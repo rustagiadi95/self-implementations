@@ -8,6 +8,7 @@ on:
 jobs:
   deploy:
     name: Deploy
+    environment: prod
     runs-on: ubuntu-latest
     env:
       MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
@@ -19,7 +20,7 @@ jobs:
         run: |
           echo "MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}"
           echo "MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}"
-          
+
       - name: Checkout Repository
         uses: actions/checkout@v2
 
