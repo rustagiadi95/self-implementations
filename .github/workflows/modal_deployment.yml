@@ -14,6 +14,12 @@ jobs:
       MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
 
     steps:
+
+      - name: print shit
+        run: |
+          echo "MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}"
+          echo "MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}"
+          
       - name: Checkout Repository
         uses: actions/checkout@v2
 
