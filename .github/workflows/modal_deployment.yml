@@ -13,7 +13,7 @@ jobs:
     env:
       MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
       MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
-      TEST_VAR: dev
+      TEST_VAR: 'dev'
 
     steps:
 
@@ -21,6 +21,7 @@ jobs:
         run: |
           echo "MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}"
           echo "MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}"
+          echo "TEST_VAR: ${{ env.TEST_VAR }}"
 
       - name: Checkout Repository
         uses: actions/checkout@v2
