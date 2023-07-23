@@ -1,7 +1,7 @@
 import modal
 import os
 
-print(os.environ['TEST_VAR'])
+print(os.environ['TEST_VAR2'])
 
 stub = modal.Stub("test-github-actions")
 
