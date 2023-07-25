@@ -34,7 +34,7 @@ jobs:
           echo "GITHUB_REF: ${GITHUB_REF#refs/heads/}"
           echo "Environment: $GITHUB_JOB"
           echo "${{ needs.set_environment.outputs.environment }}"
-          echo "${{ env.ENVIRONMENT_NAME }}""
+          echo "${{ env.ENVIRONMENT_NAME }}"
 
       # - name: Checkout Repository
       #   uses: actions/checkout@v2
