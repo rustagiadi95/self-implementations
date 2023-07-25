@@ -3,7 +3,7 @@ name: CI/CD
 on:
   push:
     branches:
-      - $github.ref
+      - main
 
 jobs:
   deploy:
@@ -23,7 +23,7 @@ jobs:
           echo "MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}"
           echo "MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}"
           echo "TEST_VAR: ${{ env.TEST_VAR }}"
-          echo "GITHUB_REF: ${{ github.ref }}"
+          echo "GITHUB_REF: ${GITHUB_REF#refs/heads/}"
           echo "BRANCH: $(git rev-parse --abbrev-ref HEAD)"
 
       # - name: Checkout Repository
