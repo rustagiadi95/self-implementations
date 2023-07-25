@@ -23,6 +23,7 @@ jobs:
           echo "MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}"
           echo "TEST_VAR: ${{ env.TEST_VAR }}"
           echo "GITHUB_REF: ${{ github.ref }}"
+          echo "BRANCH: $(git rev-parse --abbrev-ref HEAD)"
 
       # - name: Checkout Repository
       #   uses: actions/checkout@v2
