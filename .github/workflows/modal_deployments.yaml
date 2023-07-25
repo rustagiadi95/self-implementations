@@ -17,41 +17,60 @@ on:
 
 jobs:
 
-  set_environment:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Get Branch Name
-        run: |
-          echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})"
-          echo "${{ github.event.head_commit.modified }}"
-        id: get_branch_name
+  # set_environment:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Get Branch Name
+  #       run: |
+  #         echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})"
+  #       id: get_branch_name
 
   deploy:
     environment: prod
     runs-on: ubuntu-latest
+<<<<<<< HEAD
     env:
       MODAL_TOKEN_ID: ${{ github.MODAL_TOKEN_ID }}
       MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
       TEST_VAR: 'dev'
 
+=======
+>>>>>>> e84c7a5 (ga)
     steps:
-      - name: print shit
+
+      - uses: actions/checkout@v3
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            text1:
+              - 'transfomers/experiments/text1.txt'
+            text2:
+              - 'transfomers/experiments/text2.txt'
+
+      - name: print text1
+        if: steps.filter.outputs.text1 == 'true'
         run: |
           echo "GITHUB_REF: ${GITHUB_REF#refs/heads/}"
           echo "Environment: $GITHUB_JOB"
           echo "TEST_VAR: ${{ env.TEST_VAR }}"
 
-  deploy2:
-    environment: prod
-    runs-on: ubuntu-latest
-    if: ${{ contains(github.event.paths, 'transfomers/experiments/text2.txt') }}
-    steps:
-      - name: print other shit
+      - name: print text2
+        if: steps.filter.outputs.text2 == 'true'
         run: |
           echo "MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}"
           echo "MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}"
+<<<<<<< HEAD
           echo "TEST_VAR: ${{ env.TEST_VAR }}"
           echo "DEPLOYMENT ENV: ${{ github.ref_name }}"
+=======
+
+      - name: print both
+        if: steps.filter.outputs.text2 == 'true' || steps.filter.outputs.text1 == 'true'
+        run: |
+          echo "both"
+          
+>>>>>>> e84c7a5 (ga)
 
       # - name: Checkout Repository
       #   uses: actions/checkout@v2
