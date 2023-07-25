@@ -19,7 +19,7 @@ jobs:
         id: get_branch_name
 
   deploy:
-    environment: aditya_dev
+    environment: prod
     runs-on: ubuntu-latest
     env:
       MODAL_TOKEN_ID: ${{ github.MODAL_TOKEN_ID }}
@@ -27,9 +27,17 @@ jobs:
       TEST_VAR: 'dev'
 
     steps:
-
       - name: print shit
+        run: |
+          echo "GITHUB_REF: ${GITHUB_REF#refs/heads/}"
+          echo "Environment: $GITHUB_JOB"
 
+  deploy2:
+    environment: prod
+    runs-on: ubuntu-latest
+    if: ${{ github.event.head_commit.modified | contains('transfomers/experiments/txt2.txt') }}
+    steps:
+      - name: print other shit
         run: |
           echo "MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}"
           echo "MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}"
