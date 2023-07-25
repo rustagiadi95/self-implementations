@@ -31,11 +31,12 @@ jobs:
         run: |
           echo "GITHUB_REF: ${GITHUB_REF#refs/heads/}"
           echo "Environment: $GITHUB_JOB"
+          echo "TEST_VAR: ${{ env.TEST_VAR }}"
 
   deploy2:
     environment: prod
     runs-on: ubuntu-latest
-    if: ${{ github.event.head_commit.modified | contains('transfomers/experiments/text2.txt') }}
+    if: ${{ contains(github.event.paths, 'transfomers/experiments/text2.txt') }}
     steps:
       - name: print other shit
         run: |
