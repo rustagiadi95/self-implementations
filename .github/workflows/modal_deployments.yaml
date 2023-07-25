@@ -26,7 +26,7 @@ jobs:
   #       id: get_branch_name
 
   deploy:
-    environment: prod
+    environment: aditya_dev
     runs-on: ubuntu-latest
 <<<<<<< HEAD
     env:
