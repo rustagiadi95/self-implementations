@@ -19,7 +19,7 @@ jobs:
         id: get_branch_name
 
   deploy:
-    environment: prod
+    environment: aditya_dev
     runs-on: ubuntu-latest
     env:
       MODAL_TOKEN_ID: ${{ github.MODAL_TOKEN_ID }}
@@ -34,7 +34,7 @@ jobs:
           echo "TEST_VAR: ${{ env.TEST_VAR }}"
 
   deploy2:
-    environment: prod
+    environment: aditya_dev
     runs-on: ubuntu-latest
     if: ${{ contains(github.event.paths, 'transfomers/experiments/text2.txt') }}
     steps:
