@@ -33,6 +33,7 @@ jobs:
       - uses: dorny/paths-filter@v2
         id: filter
         with:
+          base: aditya_dev
           filters: |
             text1:
               - 'transformers/experiments/text1.txt'
