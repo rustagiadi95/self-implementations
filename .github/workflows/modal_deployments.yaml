@@ -24,6 +24,7 @@ jobs:
         run: |
           echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})"
           echo "${{ toJson(github.event) }}"
+          git diff-tree --no-commit-id --name-only -r ${{ github.event.head_commit.id }}
         id: get_branch_name
 
   deploy:
