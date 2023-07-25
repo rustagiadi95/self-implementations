@@ -16,7 +16,7 @@ jobs:
 
   deploy:
     name: Deploy
-    environment: ${{ needs.set_environment.outputs.BRANCH_NAME }}
+    environment: aditya
     runs-on: ubuntu-latest
     env:
       MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
