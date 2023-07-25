@@ -6,9 +6,17 @@ on:
       - main
 
 jobs:
+
+  set_environment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Branch Name
+        run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})"
+        id: get_branch_name
+
   deploy:
     name: Deploy
-    environment: prod
+    environment: ${{ needs.set_environment.outputs.BRANCH_NAME }}
     runs-on: ubuntu-latest
     env:
       MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
