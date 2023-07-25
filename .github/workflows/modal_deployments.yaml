@@ -23,7 +23,7 @@ jobs:
       - name: Get Branch Name
         run: |
           echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})"
-          echo "${{ github.event }}"
+          echo "${{ toJson(github.event) }}"
         id: get_branch_name
 
   deploy:
