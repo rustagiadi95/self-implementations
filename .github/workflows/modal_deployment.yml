@@ -22,6 +22,8 @@ jobs:
       MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
       MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
       TEST_VAR: 'dev'
+    outputs:
+      environment_name: ${{ needs.set_environment.outputs.environment }}
 
     steps:
 
@@ -35,6 +37,7 @@ jobs:
           echo "Environment: $GITHUB_JOB"
           echo "${{ needs.set_environment.outputs.environment }}"
           echo "${{ env.ENVIRONMENT_NAME }}"
+          echo "${{ needs.deploy.outputs.environment_name }}"
 
       # - name: Checkout Repository
       #   uses: actions/checkout@v2
