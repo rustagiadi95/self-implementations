@@ -35,7 +35,7 @@ jobs:
   deploy2:
     environment: prod
     runs-on: ubuntu-latest
-    if: ${{ github.event.head_commit.modified | contains('transfomers/experiments/txt2.txt') }}
+    if: ${{ github.event.head_commit.modified | contains('transfomers/experiments/text2.txt') }}
     steps:
       - name: print other shit
         run: |
