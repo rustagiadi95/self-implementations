@@ -7,13 +7,7 @@ on:
       - dev
       - main
     paths:
-<<<<<<< HEAD
       - 'env_deployments/gpu_deployments/**'
-=======
-      - .github/workflows/**
-      - transformers/experiments/text1.txt
-      - transformers/experiments/text2.txt
->>>>>>> c6451a2 (ga)
 
 jobs:
 
@@ -28,14 +22,11 @@ jobs:
   deploy:
     environment: aditya_dev
     runs-on: ubuntu-latest
-<<<<<<< HEAD
     env:
       MODAL_TOKEN_ID: ${{ github.MODAL_TOKEN_ID }}
       MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
       TEST_VAR: 'dev'
 
-=======
->>>>>>> e84c7a5 (ga)
     steps:
 
       - uses: actions/checkout@v3
@@ -44,9 +35,9 @@ jobs:
         with:
           filters: |
             text1:
-              - 'transfomers/experiments/text1.txt'
+              - 'transformers/experiments/text1.txt'
             text2:
-              - 'transfomers/experiments/text2.txt'
+              - 'transformers/experiments/text2.txt'
 
       - name: print text1
         if: steps.filter.outputs.text1 == 'true'
@@ -60,17 +51,8 @@ jobs:
         run: |
           echo "MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}"
           echo "MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}"
-<<<<<<< HEAD
           echo "TEST_VAR: ${{ env.TEST_VAR }}"
           echo "DEPLOYMENT ENV: ${{ github.ref_name }}"
-=======
-
-      - name: print both
-        if: steps.filter.outputs.text2 == 'true' || steps.filter.outputs.text1 == 'true'
-        run: |
-          echo "both"
-          
->>>>>>> e84c7a5 (ga)
 
       # - name: Checkout Repository
       #   uses: actions/checkout@v2
