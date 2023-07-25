@@ -22,20 +22,21 @@ jobs:
           echo "MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}"
           echo "MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}"
           echo "TEST_VAR: ${{ env.TEST_VAR }}"
+          ehco "GITHUB_REF: ${{ github.ref }}"
 
-      - name: Checkout Repository
-        uses: actions/checkout@v2
+      # - name: Checkout Repository
+      #   uses: actions/checkout@v2
 
-      - name: Install Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: "3.9"
+      # - name: Install Python
+      #   uses: actions/setup-python@v2
+      #   with:
+      #     python-version: "3.9"
 
-      - name: Install Modal
-        run: |
-          python -m pip install --upgrade pip
-          pip install modal-client
+      # - name: Install Modal
+      #   run: |
+      #     python -m pip install --upgrade pip
+      #     pip install modal-client
 
-      - name: Deploy job
-        run: |
-          modal deploy gpu_deployments.modal_deployments.test_githubactions_modal
+      # - name: Deploy job
+      #   run: |
+      #     modal deploy gpu_deployments.modal_deployments.test_githubactions_modal
