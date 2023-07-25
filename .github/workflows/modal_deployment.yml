@@ -22,7 +22,7 @@ jobs:
           echo "MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}"
           echo "MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}"
           echo "TEST_VAR: ${{ env.TEST_VAR }}"
-          ehco "GITHUB_REF: ${{ github.ref }}"
+          echo "GITHUB_REF: ${{ github.ref }}"
 
       # - name: Checkout Repository
       #   uses: actions/checkout@v2
