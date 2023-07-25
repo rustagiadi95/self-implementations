@@ -33,6 +33,7 @@ jobs:
           echo "TEST_VAR: ${{ env.TEST_VAR }}"
           echo "GITHUB_REF: ${GITHUB_REF#refs/heads/}"
           echo "BRANCH: $(git rev-parse --abbrev-ref HEAD)"
+          echo "Environment: $GITHUB_JOB"
 
       # - name: Checkout Repository
       #   uses: actions/checkout@v2
