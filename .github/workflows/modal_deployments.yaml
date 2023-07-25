@@ -15,7 +15,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Get Branch Name
-        run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})"
+        run: |
+          echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})"
+          echo "${{ github.event.paths }}"
         id: get_branch_name
 
   deploy:
