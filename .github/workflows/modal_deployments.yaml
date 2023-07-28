@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - aditya_dev
+      - dev
+      - main
+    paths:
+      - 'env_deployments/IDE*'
 
 jobs:
 
@@ -18,7 +22,7 @@ jobs:
     environment: aditya_dev
     runs-on: ubuntu-latest
     env:
-      MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+      MODAL_TOKEN_ID: ${{ github.MODAL_TOKEN_ID }}
       MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
       TEST_VAR: 'dev'
 
@@ -30,8 +34,7 @@ jobs:
           echo "MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}"
           echo "MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}"
           echo "TEST_VAR: ${{ env.TEST_VAR }}"
-          echo "GITHUB_REF: ${GITHUB_REF#refs/heads/}"
-          echo "Environment: $GITHUB_JOB"
+          echo "DEPLOYMENT ENV: ${{ github.ref_name }}"
 
       # - name: Checkout Repository
       #   uses: actions/checkout@v2
