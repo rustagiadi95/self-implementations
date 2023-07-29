@@ -7,7 +7,7 @@ on:
       - dev
       - main
     paths:
-      - 'env_deployments/IDE*'
+      - 'env_deployments/gpu_deployments/**'
 
 jobs:
 
