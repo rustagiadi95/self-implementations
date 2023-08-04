@@ -2,31 +2,43 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.utils.rnn import pad_sequence
-from transformers_si.model_blocks.transformer_layer import EncoderLayer, DecoderLayer
+
+from transformers_fmt.model_blocks.transformer_layer import EncoderLayer, DecoderLayer
 
 from utils.logging import logs
+
+
+
+
+###################################### POSITION EMBEDDING ######################################
 
 class PositionEmbedding(nn.Module) :
 
     def __init__(self,
-        max_seq_len: int = 64, 
+        max_seq_len: int = 128, 
         d_model: int = 512,
+        dropout: int = 0.1
     ) :
 
         super(PositionEmbedding, self).__init__()
 
         self.embedding = torch.zeros(max_seq_len, d_model)
+        self.dropout = nn.Dropout()
         
         for i in range(max_seq_len) :
             self.embedding[i, 0::2] = torch.sin((i/1000**(2*torch.arange(512)[::2]/512)))
             self.embedding[i, 1::2] = torch.cos((i/1000**(2*torch.arange(512)[1::2]/512)))
 
-        # self.embedding = torch.repeat_interleave(self.embedding.unsqueeze(0), batch_size, 0)
-
     def forward(self, x) :
-        self.embedding = torch.repeat_interleave(self.embedding.unsqueeze(0), x.size(0), 0)
-        return x + self.embedding[:, :x.size(1), :]
-    
+
+        embedding = torch.repeat_interleave(self.embedding.unsqueeze(0), x.size(0), 0)
+
+        return self.dropout(x + embedding[:, :x.size(1), :])
+
+
+
+
+###################################### ENCODER ######################################
 
 class Encoder(nn.Module) :
 
@@ -55,7 +67,12 @@ class Encoder(nn.Module) :
             x, attention_scores = layer(x)
             # logs(f'{name} output size : {x.size()}')
         return x, attention_scores
-    
+
+
+
+
+###################################### DECODER ######################################
+
 class Decoder(nn.Module) :
 
     def __init__(self,
@@ -87,6 +104,10 @@ class Decoder(nn.Module) :
         return x
 
 
+
+
+###################################### TRANSFORMER_FMT ######################################
+
 class Transformers(nn.Module) :
 
     def __init__(self,
@@ -100,7 +121,7 @@ class Transformers(nn.Module) :
 
         super(Transformers, self).__init__()
 
-        vocab_size += 3
+        vocab_size = vocab_size + 2
 
         self.encoder = Encoder(n_layer, n_heads, d_model, d_ff)
         self.decoder = Decoder(n_layer, n_heads, d_model, d_ff)
@@ -110,9 +131,6 @@ class Transformers(nn.Module) :
         self.logit_layer = nn.Linear(d_model, vocab_size)
 
         self.max_seq_len = max_seq_len
-        self.pad_token_id = 12
-        self.bos_token_id = 0
-        self.eos_token_id = 13
 
     
     def preprocess(self, inputs_token_ids) :
@@ -133,7 +151,7 @@ class Transformers(nn.Module) :
         return input_token_ids
 
     def encode(self, x) :
-        logs('encoding_now ------------------------------------')
+        # logs('encoding_now ------------------------------------', debug)
         x = self.embedding(x)
         x = self.positonal_embedding(x)
         x = self.encoder(x)
@@ -142,45 +160,41 @@ class Transformers(nn.Module) :
 
     def generate(self, enc_output, input_ids) :
 
-        logs('generating_now ------------------------------------')
+        # logs('generating_now ------------------------------------', debug)
 
         x = self.embedding(input_ids)
         x = self.positonal_embedding(x)
+        x = self.decoder(x, enc_output)
+        next_token_logits = F.relu(self.logit_layer(x))
+        next_token_logits = next_token_logits.reshape(-1, next_token_logits.size(2))
+        return F.log_softmax(next_token_logits, dim=1)
+        # sentence_length = input_ids.size(1)
 
-        sentence_length = input_ids.size(1)
+        # while sentence_length < self.max_seq_len :
 
-        while sentence_length < self.max_seq_len :
-
-            x = self.embedding(input_ids)
-            x = self.positonal_embedding(x)
-            x = self.decoder(x, enc_output)
-            next_token_logits = x[:, -1, :]
-            next_token_logits = self.logit_layer(next_token_logits)
+        #     x = self.embedding(input_ids)
+        #     x = self.positonal_embedding(x)
+        #     x = self.decoder(x, enc_output)
+        #     next_token_logits = x[:, -1, :]
+        #     
             
-            # logs(f'next_token_logits size: {next_token_logits.size()}')
-            next_token_logits = F.softmax(next_token_logits, dim=1)
-            next_token_indices = torch.argmax(next_token_logits, dim = 1)
-            # logs(f'next_token_logits size: {next_token_indices.size()}')
+        #     # logs(f'next_token_logits size: {next_token_logits.size()}')
+        #     next_token_logits = F.softmax(next_token_logits, dim=1)
+        #     next_token_indices = torch.argmax(next_token_logits, dim = 1)
+        #     # logs(f'next_token_logits size: {next_token_indices.size()}')
 
-            input_ids = torch.cat(
-                (
-                    input_ids, 
-                    next_token_indices.unsqueeze(1)
-                ), 
-                dim = 1)
+        #     input_ids = torch.cat(
+        #         (
+        #             input_ids, 
+        #             next_token_indices.unsqueeze(1)
+        #         ), 
+        #         dim = 1)
 
-            sentence_length += 1
+        #     sentence_length += 1
 
-            return input_ids
+    def forward(self, encoder_inp, decoder_inp) :
 
-    def forward(self, x: list) :
-        
-        assert type(x) == list, "x must be a list of tensors"
+        enc_output, attention_scores = self.encode(encoder_inp)
+        output = self.generate(enc_output, decoder_inp)
 
-        x = self.preprocess(x)
-        # logs(f'input : {x}')
-        # logs(f'input_shape : {x.size()}')
-        enc_output, attention_scores = self.encode(x)
-        input_ids = self.generate(enc_output, x)
-
-        return input_ids, attention_scores
+        return attention_scores, output

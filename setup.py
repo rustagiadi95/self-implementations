@@ -17,7 +17,7 @@ setup(
     license='MIT',
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="",
-    project_urls={"Bug Tracker": ""},
+    url="https://github.com/rustagiadi95/self-implementations",
+    project_urls={"Bug Tracker": "https://github.com/rustagiadi95/self-implementations/issues"},
     install_requires=requires,
 )

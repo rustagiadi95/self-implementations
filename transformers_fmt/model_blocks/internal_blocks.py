@@ -2,17 +2,12 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.utils.rnn import pad_sequence
-# from torch.utils.data import Dataset, DataLoader
+import numpy as np
 
-# from transformers import AutoTokenizer
 
-# import numpy as np
-# import matplotlib.pyplot as plt
-# import seaborn as sns
-# import pandas as pd
-# import os
 
-from utils.logging import logs
+
+###################################### SELF IMPLEMENTATIONS ######################################
 
 class ScaledDotProductAttention(nn.Module) :
 
@@ -71,9 +66,10 @@ class ScaledDotProductAttention(nn.Module) :
         return value_with_attention, attention_scores
     
 
-##############################################################################
 
 
+
+###################################### MULTI HEADED ATTENTION ######################################
 
 class MultiHeadAttention(nn.Module) :
     
@@ -110,9 +106,9 @@ class MultiHeadAttention(nn.Module) :
 
         self.mha_linear = nn.Linear(d_model, d_model)
 
-        # nn.init.normal_(self.w_qs.weight, mean = 0, std = np.sqrt(2.0 / (d_model + self.d_k)))
-        # nn.init.normal_(self.w_ks.weight, mean = 0, std = np.sqrt(2.0 / (d_model + self.d_k)))
-        # nn.init.normal_(self.w_vs.weight, mean = 0, std = np.sqrt(2.0 / (d_model + self.d_v)))
+        nn.init.normal_(self.w_qs.weight, mean = 0, std = np.sqrt(2.0 / (d_model + self.d_k)))
+        nn.init.normal_(self.w_ks.weight, mean = 0, std = np.sqrt(2.0 / (d_model + self.d_k)))
+        nn.init.normal_(self.w_vs.weight, mean = 0, std = np.sqrt(2.0 / (d_model + self.d_v)))
 
     def forward(self, x, q = None) :
 
@@ -157,15 +153,16 @@ class MultiHeadAttention(nn.Module) :
 
         value = value.view(value.size(1), value.size(2), -1)
 
-        value = self.dropout(value)
+        # value = self.dropout(value)
 
-        value = F.gelu(self.mha_linear(value))
+        value = self.dropout(F.gelu(self.mha_linear(value)))
 
         return value, attention
     
 
-##############################################################################
 
+
+###################################### ADD LAYER NORMALIZATION ######################################
 
 class AddLayerNormalization(nn.Module) :
 
@@ -176,12 +173,13 @@ class AddLayerNormalization(nn.Module) :
         self.layer_norm = nn.LayerNorm([d_model])
 
     def forward(self, x, mha_output) :
-
+        
         return self.layer_norm(x + mha_output)
     
 
-##############################################################################
 
+
+###################################### POINT-WISE FEED FORWARD ######################################
 
 class PointWiseFeedforward(nn.Module) :
 
@@ -202,7 +200,7 @@ class PointWiseFeedforward(nn.Module) :
         self.linear2 = nn.Linear(d_ff, d_model)
 
     def forward(self, x) :
-
+        
         linear1_output = self.linear1(x)
         linear2_output = self.linear2(F.gelu(linear1_output))
 

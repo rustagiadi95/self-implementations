@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.utils.rnn import pad_sequence
 
-from transformers_si.model_blocks.internal_blocks import (
+from transformers_fmt.model_blocks.internal_blocks import (
     ScaledDotProductAttention,
     MultiHeadAttention,
     AddLayerNormalization,
@@ -12,6 +12,11 @@ from transformers_si.model_blocks.internal_blocks import (
 
 from utils.logging import logs
 
+
+
+
+
+###################################### SINGLE ENCODER LAYER ######################################
 
 class EncoderLayer(nn.Module) :
 
@@ -44,6 +49,9 @@ class EncoderLayer(nn.Module) :
     
 
 
+
+###################################### SINGLE DECODER LAYER ######################################
+
 class DecoderLayer(nn.Module) :
 
     def __init__(self, 
@@ -73,3 +81,4 @@ class DecoderLayer(nn.Module) :
         norm_decoder_output = self.layer_norm3(norm_cross_x, x)
 
         return norm_decoder_output
+    
