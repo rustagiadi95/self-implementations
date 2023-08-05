@@ -17,17 +17,18 @@ class PositionEmbedding(nn.Module) :
     def __init__(self,
         max_seq_len: int = 128, 
         d_model: int = 512,
-        dropout: int = 0.1
+        dropout: int = 0.1,
+        device: str = 'cuda'
     ) :
 
         super(PositionEmbedding, self).__init__()
 
-        self.embedding = torch.zeros(max_seq_len, d_model)
-        self.dropout = nn.Dropout()
+        self.embedding = torch.zeros(max_seq_len, d_model).to(device)
+        self.dropout = nn.Dropout(dropout)
         
         for i in range(max_seq_len) :
-            self.embedding[i, 0::2] = torch.sin((i/1000**(2*torch.arange(512)[::2]/512)))
-            self.embedding[i, 1::2] = torch.cos((i/1000**(2*torch.arange(512)[1::2]/512)))
+            self.embedding[i, 0::2] = torch.sin((i/1000**(2*torch.arange(d_model)[::2]/d_model)))
+            self.embedding[i, 1::2] = torch.cos((i/1000**(2*torch.arange(d_model)[1::2]/d_model)))
 
     def forward(self, x) :
 
@@ -46,7 +47,8 @@ class Encoder(nn.Module) :
                  n_layer: int = 6,
                  n_heads: int = 8,
                  d_model: int = 512,
-                 d_ff: int = 2048
+                 d_ff: int = 2048,
+                 device: str = 'cuda'
     ) :
         super(Encoder, self).__init__()
         
@@ -56,7 +58,8 @@ class Encoder(nn.Module) :
                 EncoderLayer(
                     n_heads,
                     d_model,
-                    d_ff
+                    d_ff,
+                    device = device
                 )
             ) for i in range(n_layer)
             })
@@ -79,7 +82,8 @@ class Decoder(nn.Module) :
                  n_layer: int = 6,
                  n_heads: int = 8,
                  d_model: int = 512,
-                 d_ff: int = 2048
+                 d_ff: int = 2048,
+                 device: str = 'cuda'
     ) -> None :
 
         super(Decoder, self).__init__()
@@ -90,7 +94,8 @@ class Decoder(nn.Module) :
                 DecoderLayer(
                     n_heads,
                     d_model,
-                    d_ff
+                    d_ff,
+                    device = device
                 )
             ) for i in range(n_layer)
         })
@@ -117,15 +122,16 @@ class Transformers(nn.Module) :
                  d_ff,
                  max_seq_len,
                  vocab_size,
+                 device
         ) -> None :
 
         super(Transformers, self).__init__()
 
         vocab_size = vocab_size + 2
 
-        self.encoder = Encoder(n_layer, n_heads, d_model, d_ff)
-        self.decoder = Decoder(n_layer, n_heads, d_model, d_ff)
-        self.positonal_embedding = PositionEmbedding(max_seq_len, d_model)
+        self.encoder = Encoder(n_layer, n_heads, d_model, d_ff, device=device)
+        self.decoder = Decoder(n_layer, n_heads, d_model, d_ff, device=device)
+        self.positonal_embedding = PositionEmbedding(max_seq_len, d_model, device=device)
 
         self.embedding = nn.Embedding(vocab_size, d_model)
         self.logit_layer = nn.Linear(d_model, vocab_size)

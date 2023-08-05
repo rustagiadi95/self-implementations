@@ -12,9 +12,10 @@ import numpy as np
 class ScaledDotProductAttention(nn.Module) :
 
     def __init__(self, 
-                 n_heads:int = 8,
-                 d_model:int = 512,
-                 mask:bool = False
+                 n_heads: int = 8,
+                 d_model: int = 512,
+                 mask: bool = False,
+                 device: str = 'cuda'
         ) -> None :
 
         """
@@ -30,6 +31,7 @@ class ScaledDotProductAttention(nn.Module) :
         self.d_model = d_model
         self.mask = mask
         self.d_k = int(d_model/n_heads)
+        self.device = device
 
     def forward(self,
                 key : torch.Tensor,
@@ -57,8 +59,8 @@ class ScaledDotProductAttention(nn.Module) :
         attention_scores = torch.softmax(attention_scores, dim = 3)
         
         if self.mask :
-            mask = torch.ones(self.n_heads, batch_size, seq_len, seq_len)
-            mask = torch.tril(mask)
+            mask = torch.ones(self.n_heads, batch_size, seq_len, seq_len).to(self.device)
+            mask = torch.tril(mask).to(self.device)
             attention_scores = torch.matmul(attention_scores, mask)
             
         value_with_attention = torch.matmul(attention_scores, value)
@@ -78,7 +80,8 @@ class MultiHeadAttention(nn.Module) :
                  d_model: int = 512, 
                  dropout: float = 0.1, 
                  mask: bool = False,
-                 self_attention:bool = True
+                 self_attention: bool = True,
+                 device: str = 'cuda'
         ) :
 
         """
@@ -102,7 +105,7 @@ class MultiHeadAttention(nn.Module) :
         self.w_ks = nn.Linear(d_model, n_head * self.d_k)
         self.w_vs = nn.Linear(d_model, n_head * self.d_v)
 
-        self.attention = ScaledDotProductAttention(n_head, d_model, mask)
+        self.attention = ScaledDotProductAttention(n_head, d_model, mask, device = device)
 
         self.mha_linear = nn.Linear(d_model, d_model)
 

@@ -23,12 +23,13 @@ class EncoderLayer(nn.Module) :
     def __init__(self,
                  n_heads: int = 8,
                  d_model: int = 512,
-                 d_ff: int = 2048
+                 d_ff: int = 2048,
+                 device: str = 'cuda'
         ) -> None :
         
         super(EncoderLayer, self).__init__()
         
-        self.mha = MultiHeadAttention(n_heads, d_model, )
+        self.mha = MultiHeadAttention(n_heads, d_model, device = device)
         self.layer_norm = AddLayerNormalization(d_model)
         self.pff = PointWiseFeedforward(d_ff, d_model)
         self.layer_norm2 = AddLayerNormalization(d_model)
@@ -58,12 +59,13 @@ class DecoderLayer(nn.Module) :
                  n_heads,
                  d_model,
                  d_ff, 
+                 device
     ) -> None :
 
         super(DecoderLayer, self).__init__()
 
-        self.mha = MultiHeadAttention(n_head=n_heads, d_model=d_model, mask = True)
-        self.cross_mha = MultiHeadAttention(n_head=n_heads, d_model=d_model, self_attention=False)
+        self.mha = MultiHeadAttention(n_head=n_heads, d_model=d_model, mask = True, device = device)
+        self.cross_mha = MultiHeadAttention(n_head=n_heads, d_model=d_model, self_attention=False, device = device)
         self.layer_norm1 = AddLayerNormalization(d_model)
         self.layer_norm2 = AddLayerNormalization(d_model)
         self.layer_norm3 = AddLayerNormalization(d_model)
