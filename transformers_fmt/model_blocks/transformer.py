@@ -132,69 +132,30 @@ class Transformers(nn.Module) :
 
         self.max_seq_len = max_seq_len
 
-    
-    def preprocess(self, inputs_token_ids) :
+
+    def encoder_pass(self, x) :
         
-        input_token_ids = [
-            torch.cat(
-                (torch.tensor([self.bos_token_id]), inp),
-            ) for inp in inputs_token_ids
-        ]
-
-        input_token_ids = pad_sequence(input_token_ids, batch_first=True, padding_value = self.pad_token_id)
-
-        input_token_ids = torch.cat(
-            (input_token_ids, torch.tensor([[self.eos_token_id] for _ in range(input_token_ids.size(0))])),
-            dim = 1
-        )
-
-        return input_token_ids
-
-    def encode(self, x) :
-        # logs('encoding_now ------------------------------------', debug)
         x = self.embedding(x)
         x = self.positonal_embedding(x)
         x = self.encoder(x)
 
         return x
+    
 
-    def generate(self, enc_output, input_ids) :
-
-        # logs('generating_now ------------------------------------', debug)
+    def decoder_pass(self, enc_output, input_ids) :
 
         x = self.embedding(input_ids)
         x = self.positonal_embedding(x)
         x = self.decoder(x, enc_output)
+
         next_token_logits = F.relu(self.logit_layer(x))
         next_token_logits = next_token_logits.reshape(-1, next_token_logits.size(2))
+
         return F.log_softmax(next_token_logits, dim=1)
-        # sentence_length = input_ids.size(1)
-
-        # while sentence_length < self.max_seq_len :
-
-        #     x = self.embedding(input_ids)
-        #     x = self.positonal_embedding(x)
-        #     x = self.decoder(x, enc_output)
-        #     next_token_logits = x[:, -1, :]
-        #     
-            
-        #     # logs(f'next_token_logits size: {next_token_logits.size()}')
-        #     next_token_logits = F.softmax(next_token_logits, dim=1)
-        #     next_token_indices = torch.argmax(next_token_logits, dim = 1)
-        #     # logs(f'next_token_logits size: {next_token_indices.size()}')
-
-        #     input_ids = torch.cat(
-        #         (
-        #             input_ids, 
-        #             next_token_indices.unsqueeze(1)
-        #         ), 
-        #         dim = 1)
-
-        #     sentence_length += 1
 
     def forward(self, encoder_inp, decoder_inp) :
 
-        enc_output, attention_scores = self.encode(encoder_inp)
-        output = self.generate(enc_output, decoder_inp)
+        enc_output, attention_scores = self.encoder_pass(encoder_inp)
+        output = self.decoder_pass(enc_output, decoder_inp)
 
         return attention_scores, output
