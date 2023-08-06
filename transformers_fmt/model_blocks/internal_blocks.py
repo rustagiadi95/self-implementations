@@ -113,7 +113,7 @@ class MultiHeadAttention(nn.Module) :
         nn.init.normal_(self.w_ks.weight, mean = 0, std = np.sqrt(2.0 / (d_model + self.d_k)))
         nn.init.normal_(self.w_vs.weight, mean = 0, std = np.sqrt(2.0 / (d_model + self.d_v)))
 
-    def forward(self, x, q = None) :
+    def forward(self, x, encoder_mask, q = None) :
 
         """
         Implementation of multi head attention layer.

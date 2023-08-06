@@ -64,10 +64,10 @@ class Encoder(nn.Module) :
             ) for i in range(n_layer)
             })
 
-    def forward(self, x) :
+    def forward(self, x, encoder_mask) :
         # logs(f'input size : {x.size()}')
         for name, layer in self.encoder.items() :
-            x, attention_scores = layer(x)
+            x, attention_scores = layer(x, encoder_mask)
             # logs(f'{name} output size : {x.size()}')
         return x, attention_scores
 
@@ -139,11 +139,11 @@ class Transformers(nn.Module) :
         self.max_seq_len = max_seq_len
 
 
-    def encoder_pass(self, x) :
+    def encoder_pass(self, x, encoder_mask) :
         
         x = self.embedding(x)
         x = self.positonal_embedding(x)
-        x = self.encoder(x)
+        x = self.encoder(x, encoder_mask)
 
         return x
     
@@ -159,9 +159,9 @@ class Transformers(nn.Module) :
 
         return F.log_softmax(next_token_logits, dim=1)
 
-    def forward(self, encoder_inp, decoder_inp) :
+    def forward(self, encoder_inp, decoder_inp, encoder_mask) :
 
-        enc_output, attention_scores = self.encoder_pass(encoder_inp)
+        enc_output, attention_scores = self.encoder_pass(encoder_inp, encoder_mask)
         output = self.decoder_pass(enc_output, decoder_inp)
 
         return attention_scores, output

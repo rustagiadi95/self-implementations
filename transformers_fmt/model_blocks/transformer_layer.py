@@ -34,9 +34,9 @@ class EncoderLayer(nn.Module) :
         self.pff = PointWiseFeedforward(d_ff, d_model)
         self.layer_norm2 = AddLayerNormalization(d_model)
 
-    def forward(self, x) :
+    def forward(self, x, encoder_mask) :
 
-        mha_output, mha_attention_scores = self.mha(x)
+        mha_output, mha_attention_scores = self.mha(x, encoder_mask)
         # logs(f"mha_output shape: {mha_output.shape}")
         norm_output1 = self.layer_norm(x, mha_output)
         # logs(f"norm_output1 shape: {norm_output1.shape}")
