@@ -101,11 +101,10 @@ class Decoder(nn.Module) :
         })
 
 
-    def forward(self, x, enc_out) :
+    def forward(self, x, encoder_out, encoder_mask) :
 
         for name, layer in self.decoder.items() :
-            x = layer(x, enc_out)
-            
+            x = layer(x, encoder_out, encoder_mask)
         return x
 
 
@@ -148,11 +147,11 @@ class Transformers(nn.Module) :
         return x
     
 
-    def decoder_pass(self, enc_output, input_ids) :
+    def decoder_pass(self, encoder_output, input_ids, encoder_mask) :
 
         x = self.embedding(input_ids)
         x = self.positonal_embedding(x)
-        x = self.decoder(x, enc_output)
+        x = self.decoder(x, encoder_output, encoder_mask)
 
         next_token_logits = F.relu(self.logit_layer(x))
         next_token_logits = next_token_logits.reshape(-1, next_token_logits.size(2))
@@ -162,6 +161,6 @@ class Transformers(nn.Module) :
     def forward(self, encoder_inp, decoder_inp, encoder_mask) :
 
         enc_output, attention_scores = self.encoder_pass(encoder_inp, encoder_mask)
-        output = self.decoder_pass(enc_output, decoder_inp)
+        output = self.decoder_pass(enc_output, decoder_inp, encoder_mask)
 
         return attention_scores, output

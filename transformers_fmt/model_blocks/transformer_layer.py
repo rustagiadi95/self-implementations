@@ -36,7 +36,7 @@ class EncoderLayer(nn.Module) :
 
     def forward(self, x, encoder_mask) :
 
-        mha_output, mha_attention_scores = self.mha(x, encoder_mask)
+        mha_output, mha_attention_scores = self.mha(x, encoder_mask=encoder_mask)
         # logs(f"mha_output shape: {mha_output.shape}")
         norm_output1 = self.layer_norm(x, mha_output)
         # logs(f"norm_output1 shape: {norm_output1.shape}")
@@ -64,19 +64,19 @@ class DecoderLayer(nn.Module) :
 
         super(DecoderLayer, self).__init__()
 
-        self.mha = MultiHeadAttention(n_head=n_heads, d_model=d_model, mask = True, device = device)
-        self.cross_mha = MultiHeadAttention(n_head=n_heads, d_model=d_model, self_attention=False, device = device)
+        self.mha = MultiHeadAttention(n_heads, d_model, mask = True, device = device)
+        self.cross_mha = MultiHeadAttention(n_heads, d_model, self_attention=False, device = device)
         self.layer_norm1 = AddLayerNormalization(d_model)
         self.layer_norm2 = AddLayerNormalization(d_model)
         self.layer_norm3 = AddLayerNormalization(d_model)
         self.pff = PointWiseFeedforward(d_ff, d_model)
 
-    def forward(self, x, enc_out) :
+    def forward(self, x, encoder_out, encoder_mask) :
         ## passing encoder output to all decoder layers : to be discussed with Deepak
         decoder_query, _ = self.mha(x)
         norm_decoder_query = self.layer_norm1(x, decoder_query)
 
-        x, _ = self.cross_mha(enc_out, norm_decoder_query)
+        x, _ = self.cross_mha(encoder_out, q = norm_decoder_query, encoder_mask=encoder_mask)
         norm_cross_x = self.layer_norm2(norm_decoder_query, x)
 
         x = self.pff(norm_cross_x)

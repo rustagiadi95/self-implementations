@@ -15,7 +15,7 @@ class ScaledDotProductAttention(nn.Module) :
                  n_heads: int = 8,
                  d_model: int = 512,
                  mask: bool = False,
-                 device: str = 'cuda'
+                 device: str = 'cuda',
         ) -> None :
 
         """
@@ -36,7 +36,8 @@ class ScaledDotProductAttention(nn.Module) :
     def forward(self,
                 key : torch.Tensor,
                 query : torch.Tensor,
-                value : torch.Tensor
+                value : torch.Tensor,
+                encoder_mask : torch.Tensor = None
         ) -> torch.Tensor :
 
         """
@@ -46,6 +47,7 @@ class ScaledDotProductAttention(nn.Module) :
             key (torch.Tensor): Key tensor. Shape = (n_heads, batch_size, seq_len, d_model/n_heads)
             query (torch.Tensor): Query tensor. Shape = (n_heads, batch_size, seq_len, d_model/n_heads)
             value (torch.Tensor): Value tensor. Shape = (n_heads, batch_size, seq_len, d_model/n_heads)
+            encoder_mask (torch.Tensor): Mask applied to attention to make softmax scores of [PAD] token 0. Defaults to None
 
         Returns:
             value_with_attention: Value with attention applied. Shape = (n_heads, batch_size, seq_len, d_model/n_heads)
@@ -56,12 +58,24 @@ class ScaledDotProductAttention(nn.Module) :
         batch_size, seq_len = key.size(1), key.size(2)
 
         attention_scores = torch.matmul(query, key.transpose(2, 3))/torch.sqrt(torch.tensor(self.d_k))
-        attention_scores = torch.softmax(attention_scores, dim = 3)
+
+        if encoder_mask is not None:
+            attention_scores = torch.masked_fill(
+                                    attention_scores, 
+                                    encoder_mask.unsqueeze(1) == False,
+                                    float('-inf')
+                                )
         
         if self.mask :
-            mask = torch.ones(self.n_heads, batch_size, seq_len, seq_len).to(self.device)
-            mask = torch.tril(mask).to(self.device)
-            attention_scores = torch.matmul(attention_scores, mask)
+            seq_len_enc = attention_scores.size(2)
+            seq_len_dec = attention_scores.size(3)
+            attention_scores = torch.masked_fill(
+                                    attention_scores, 
+                                    torch.tril(torch.ones(seq_len_enc, seq_len_dec)).to(self.device) == False, 
+                                    float('-inf')
+                                )
+
+        attention_scores = torch.softmax(attention_scores, dim = 3)
             
         value_with_attention = torch.matmul(attention_scores, value)
 
@@ -81,7 +95,7 @@ class MultiHeadAttention(nn.Module) :
                  dropout: float = 0.1, 
                  mask: bool = False,
                  self_attention: bool = True,
-                 device: str = 'cuda'
+                 device: str = 'cuda',
         ) :
 
         """
@@ -113,7 +127,7 @@ class MultiHeadAttention(nn.Module) :
         nn.init.normal_(self.w_ks.weight, mean = 0, std = np.sqrt(2.0 / (d_model + self.d_k)))
         nn.init.normal_(self.w_vs.weight, mean = 0, std = np.sqrt(2.0 / (d_model + self.d_v)))
 
-    def forward(self, x, encoder_mask, q = None) :
+    def forward(self, x, encoder_mask = None, q = None) :
 
         """
         Implementation of multi head attention layer.
@@ -152,7 +166,7 @@ class MultiHeadAttention(nn.Module) :
         query = query.view(-1, query.size(0), query.size(1), self.d_k)
         value = value.view(-1, value.size(0), value.size(1), self.d_v)
 
-        value, attention = self.attention(key, query, value)
+        value, attention = self.attention(key, query, value, encoder_mask)
 
         value = value.view(value.size(1), value.size(2), -1)
 
