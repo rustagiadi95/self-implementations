@@ -171,3 +171,4 @@ cython_debug/
 /data
 /data_archive
 /model_weights
+/logs
